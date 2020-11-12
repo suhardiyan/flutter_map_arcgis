@@ -19,6 +19,20 @@ class PolygonOptions {
   });
 }
 
+class PolylineOptions {
+  final Color color;
+  final double borderStrokeWidth;
+  final Color borderColor;
+  final bool isDotted;
+
+  const PolylineOptions({
+    this.color = const Color(0xFF00FF00),
+    this.borderStrokeWidth = 0.0,
+    this.borderColor = const Color(0xFFFFFF00),
+    this.isDotted = false,
+  });
+}
+
 class AnimationsOptions {
   final Duration zoom;
   final Duration fitBound;

@@ -215,7 +215,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
         for (var i = 0; i < queue.length; i++) {
           var coordsNew = _wrapCoords(queue[i]);
 
-          var Bounds = _CoordsToBounds(coordsNew);
+          var Bounds = _coordsToBounds(coordsNew);
           requestFeatures(Bounds);
         }
       }
@@ -226,7 +226,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
     }
   }
 
-  LatLngBounds _CoordsToBounds(Coords coords) {
+  LatLngBounds _coordsToBounds(Coords coords) {
     var map = widget.map;
     var cellSize = 256.0;
     var nwPoint = coords.multiplyBy(cellSize);
@@ -259,7 +259,11 @@ class _FeatureLayerState extends State<FeatureLayer> {
 
       var URL =
           '${widget.options.url}/query?f=json&geometry={"spatialReference":{"wkid":4326},${bounds_}}&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
-
+      if (widget.options.geometryType == "polyline") {
+        URL =
+            '${widget.options.url}/query?f=json&geometry=&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
+      }
+      print(URL);
       Response response = await Dio().get(URL);
 
       var features_ = <dynamic>[];
@@ -270,6 +274,9 @@ class _FeatureLayerState extends State<FeatureLayer> {
       }
 
       if (jsonData["features"] != null) {
+        if (widget.options.geometryType == "polyline") {
+          widget.options.render(jsonData["features"]);
+        }
         for (var feature in jsonData["features"]) {
           if (widget.options.geometryType == "point") {
             var render = widget.options.render(feature["attributes"]);
@@ -312,10 +319,32 @@ class _FeatureLayerState extends State<FeatureLayer> {
               }
             }
           }
+          // } else if (widget.options.geometryType == "polyline") {
+            // for (var paths in feature["geometry"]["paths"]) {
+            //   var lines = <LatLng>[];
+
+            //   for (var _path in paths) {
+            //     lines.add(LatLng(_path[1].toDouble(), _path[0].toDouble()));
+            //   }
+              
+            //   var render = widget.options.render(feature["attributes"]);
+              
+            //   if (render != null) {
+            //     features_.add(PolylineEsri( 
+            //       points: lines,
+            //       borderStrokeWidth: render.borderStrokeWidth,
+            //       color: render.color,
+            //       borderColor: render.borderColor,
+            //       isDotted: render.isDotted,
+            //       attributes: feature["attributes"],
+            //     ));
+            //   }
+            // }
+          // }
         }
 
         activeRequests++;
-
+        
         if (activeRequests >= targetRequests) {
           setState(() {
             features = [...featuresPre, ...features_];
@@ -367,12 +396,18 @@ class _FeatureLayerState extends State<FeatureLayer> {
   Widget build(BuildContext context) {
     if (widget.options.geometryType == "point") {
       return _buildMarkers(context);
+    } else if (widget.options.geometryType == "polyline") {
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints bc) {
+          final size = Size(bc.maxWidth, bc.maxHeight);
+          return _buildPolyline(context, size);
+        },
+      );
     } else {
       return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints bc) {
-          // TODO unused BoxContraints should remove?
           final size = Size(bc.maxWidth, bc.maxHeight);
-          return _buildPoygons(context, size);
+          return _buildPolygons(context, size);
         },
       );
     }
@@ -417,7 +452,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
     );
   }
 
-  Widget _buildPoygons(BuildContext context, Size size) {
+  Widget _buildPolygons(BuildContext context, Size size) {
     var elements = <Widget>[];
     if (features.isNotEmpty) {
       for (var polygon in features) {
@@ -475,6 +510,87 @@ class _FeatureLayerState extends State<FeatureLayer> {
       ),
     );
   }
+
+  Widget _buildPolyline(BuildContext context, Size size) {
+    var elements = <Widget>[];
+    if (features.isNotEmpty) {
+      for (var polyline in features) {
+        if (polyline is PolylineEsri) {
+          polyline.offsets.clear();
+          
+          var i = 0;
+
+          for (var point in polyline.points) {
+            var pos = widget.map.project(point);
+            pos = pos.multiplyBy(
+                    widget.map.getZoomScale(widget.map.zoom, widget.map.zoom)) -
+                widget.map.getPixelOrigin();
+            polyline.offsets.add(Offset(pos.x.toDouble(), pos.y.toDouble()));
+            if (i > 0 && i < polyline.points.length) {
+              polyline.offsets.add(Offset(pos.x.toDouble(), pos.y.toDouble()));
+            }
+            i++;
+          }
+
+          elements.add(
+            Container()
+            // GestureDetector(
+            //   onTapUp: (details) {
+                // RenderBox box = context.findRenderObject();
+                // final offset = box.globalToLocal(details.globalPosition);
+
+                // var latLng = _offsetToCrs(offset);
+                // findTapedPolygon(latLng);
+            //   },
+            //   child: CustomPaint(
+            //     painter: PolygonPainter(polyline),
+            //     size: size,
+            //   )
+            // ),
+          );
+        }
+      }
+      // for (var polygon in features) {
+      //   if (polygon is PolygonEsri) {
+      //     polygon.offsets.clear();
+      //     var i = 0;
+
+      //     for (var point in polygon.points) {
+      //       var pos = widget.map.project(point);
+      //       pos = pos.multiplyBy(
+      //               widget.map.getZoomScale(widget.map.zoom, widget.map.zoom)) -
+      //           widget.map.getPixelOrigin();
+      //       polygon.offsets.add(Offset(pos.x.toDouble(), pos.y.toDouble()));
+      //       if (i > 0 && i < polygon.points.length) {
+      //         polygon.offsets.add(Offset(pos.x.toDouble(), pos.y.toDouble()));
+      //       }
+      //       i++;
+      //     }
+
+      //     elements.add(
+      //       GestureDetector(
+      //           onTapUp: (details) {
+      //             RenderBox box = context.findRenderObject();
+      //             final offset = box.globalToLocal(details.globalPosition);
+
+      //             var latLng = _offsetToCrs(offset);
+      //             findTapedPolygon(latLng);
+      //           },
+      //           child: CustomPaint(
+      //             painter: PolygonPainter(polygon),
+      //             size: size,
+      //           )),
+      //     );
+      //   }
+      // }
+    }
+
+    return Container(
+      child: Stack(
+        children: elements,
+      ),
+    );
+  }
 }
 
 class PolygonEsri extends Polygon {
@@ -488,6 +604,28 @@ class PolygonEsri extends Polygon {
   LatLngBounds boundingBox;
 
   PolygonEsri({
+    this.points,
+    this.color = const Color(0xFF00FF00),
+    this.borderStrokeWidth = 0.0,
+    this.borderColor = const Color(0xFFFFFF00),
+    this.isDotted = false,
+    this.attributes = null,
+  }) {
+    boundingBox = LatLngBounds.fromPoints(points);
+  }
+}
+
+class PolylineEsri extends Polyline {
+  final List<LatLng> points;
+  final List<Offset> offsets = [];
+  final Color color;
+  final double borderStrokeWidth;
+  final Color borderColor;
+  final bool isDotted;
+  final dynamic attributes;
+  LatLngBounds boundingBox;
+
+  PolylineEsri({
     this.points,
     this.color = const Color(0xFF00FF00),
     this.borderStrokeWidth = 0.0,

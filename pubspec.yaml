@@ -5,7 +5,8 @@ author: Khan Khulgun Team
 homepage: https://github.com/munkh-altai/flutter_map_arcgis
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  # sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
