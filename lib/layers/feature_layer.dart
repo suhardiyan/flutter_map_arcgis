@@ -263,7 +263,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
         URL =
             '${widget.options.url}/query?f=json&geometry=&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
       }
-      print(URL);
+      // print(URL);
       Response response = await Dio().get(URL);
 
       var features_ = <dynamic>[];
@@ -277,8 +277,15 @@ class _FeatureLayerState extends State<FeatureLayer> {
         if (widget.options.geometryType == "polyline") {
           widget.options.render(jsonData["features"]);
         }
+        int x = 0;
         for (var feature in jsonData["features"]) {
           if (widget.options.geometryType == "point") {
+            
+            if (x < 1) {
+              feature["attributes"]["_long"] = feature["geometry"]["x"].toString();
+              feature["attributes"]["_lat"] = feature["geometry"]["y"].toString();
+            }
+
             var render = widget.options.render(feature["attributes"]);
 
             if (render != null) {
@@ -297,6 +304,9 @@ class _FeatureLayerState extends State<FeatureLayer> {
                 )),
               ));
             }
+
+            x++;
+
           } else if (widget.options.geometryType == "polygon") {
             for (var ring in feature["geometry"]["rings"]) {
               var points = <LatLng>[];
@@ -304,6 +314,9 @@ class _FeatureLayerState extends State<FeatureLayer> {
               for (var point_ in ring) {
                 points.add(LatLng(point_[1].toDouble(), point_[0].toDouble()));
               }
+
+              feature["attributes"]["_long"] = points[0].longitude.toString();
+              feature["attributes"]["_lat"] = points[0].latitude.toString();
 
               var render = widget.options.render(feature["attributes"]);
 
