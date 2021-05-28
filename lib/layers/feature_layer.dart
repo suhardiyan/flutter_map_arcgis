@@ -259,7 +259,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
       var bounds_ =
           '"xmin":${bounds.southWest.longitude},"ymin":${bounds.southWest.latitude},"xmax":${bounds.northEast.longitude},"ymax":${bounds.northEast.latitude}';
 
-      if (widget.options.attr != null) {
+      if (!(widget.options.attr).isEmpty) {
         print("MASUK KE ATTR");
         jsonData = widget.options.attr;
         print(jsonData);
