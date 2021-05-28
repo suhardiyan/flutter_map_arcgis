@@ -104,6 +104,9 @@ class FeatureLayerOptions extends LayerOptions {
   /// Function to call when a Marker is tapped
   final void Function(dynamic attributes, LatLng location) onTap;
 
+  /// Render
+  final dynamic Function(dynamic attributes) resp;
+
   FeatureLayerOptions({
     @required this.url,
     @required this.geometryType,
@@ -122,5 +125,6 @@ class FeatureLayerOptions extends LayerOptions {
     this.spiderfyShapePositions,
     this.onTap,
     this.render,
+    this.resp,
   });
 }

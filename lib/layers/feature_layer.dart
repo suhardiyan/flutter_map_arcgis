@@ -68,7 +68,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
     isMoving = true;
     timer = Timer(Duration(milliseconds: 200), () {
       isMoving = false;
-      _resetView();
+      // _resetView();
     });
   }
 
@@ -263,8 +263,9 @@ class _FeatureLayerState extends State<FeatureLayer> {
         URL =
             '${widget.options.url}/query?f=json&geometry=&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
       }
-      // print(URL);
       Response response = await Dio().get(URL);
+
+      // print("asdfghjk");
 
       var features_ = <dynamic>[];
 
@@ -272,6 +273,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
       if (jsonData is String) {
         jsonData = jsonDecode(jsonData);
       }
+      // print(jsonData);
 
       if (jsonData["features"] != null) {
         if (widget.options.geometryType == "polyline") {
@@ -287,6 +289,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
             }
 
             var render = widget.options.render(feature["attributes"]);
+            widget.options.resp(jsonData["features"]);
 
             if (render != null) {
               features_.add(Marker(
