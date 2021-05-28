@@ -260,11 +260,8 @@ class _FeatureLayerState extends State<FeatureLayer> {
           '"xmin":${bounds.southWest.longitude},"ymin":${bounds.southWest.latitude},"xmax":${bounds.northEast.longitude},"ymax":${bounds.northEast.latitude}';
 
       if (!(widget.options.attr).isEmpty) {
-        print("MASUK KE ATTR");
         jsonData = widget.options.attr;
-        print(jsonData);
       } else {
-        print("MASUK KE URL");
         var URL =
             '${widget.options.url}/query?f=json&geometry={"spatialReference":{"wkid":4326},${bounds_}}&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
         if (widget.options.geometryType == "polyline") {
