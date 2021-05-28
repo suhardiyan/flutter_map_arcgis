@@ -262,6 +262,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
       if (widget.options.attr != null) {
         print("MASUK KE ATTR");
         jsonData = widget.options.attr;
+        print(jsonData);
       } else {
         print("MASUK KE URL");
         var URL =
