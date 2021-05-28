@@ -265,7 +265,12 @@ class _FeatureLayerState extends State<FeatureLayer> {
       }
       Response response = await Dio().get(URL);
 
-      // print("asdfghjk");
+      print("asdfghjk");
+      print(widget.options.attr);
+      print((widget.options.attr).isEmpty);
+      print(widget.options.attr == "");
+      print(widget.options.attr == null);
+      print("asdfghjk");
 
       var features_ = <dynamic>[];
 

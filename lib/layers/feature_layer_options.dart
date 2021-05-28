@@ -73,6 +73,9 @@ class FeatureLayerOptions extends LayerOptions {
   /// Feature layer URL
   final String geometryType;
 
+  /// Attribute features
+  final dynamic attr;
+
   /// Options for fit bounds
   final FitBoundsOptions fitBoundsOptions;
 
@@ -126,5 +129,6 @@ class FeatureLayerOptions extends LayerOptions {
     this.onTap,
     this.render,
     this.resp,
+    this.attr,
   });
 }
