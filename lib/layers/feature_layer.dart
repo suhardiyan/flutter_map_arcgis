@@ -68,7 +68,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
     isMoving = true;
     timer = Timer(Duration(milliseconds: 200), () {
       isMoving = false;
-      // _resetView();
+      _resetView();
     });
   }
 
@@ -254,31 +254,30 @@ class _FeatureLayerState extends State<FeatureLayer> {
 
   void requestFeatures(LatLngBounds bounds) async {
     try {
+      var jsonData;
+
       var bounds_ =
           '"xmin":${bounds.southWest.longitude},"ymin":${bounds.southWest.latitude},"xmax":${bounds.northEast.longitude},"ymax":${bounds.northEast.latitude}';
 
-      var URL =
-          '${widget.options.url}/query?f=json&geometry={"spatialReference":{"wkid":4326},${bounds_}}&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
-      if (widget.options.geometryType == "polyline") {
-        URL =
-            '${widget.options.url}/query?f=json&geometry=&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
+      if (widget.options.attr != null) {
+        jsonData = widget.options.attr;
+      } else {
+        var URL =
+            '${widget.options.url}/query?f=json&geometry={"spatialReference":{"wkid":4326},${bounds_}}&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
+        if (widget.options.geometryType == "polyline") {
+          URL =
+              '${widget.options.url}/query?f=json&geometry=&maxRecordCountFactor=30&outFields=*&outSR=4326&resultType=tile&returnExceededLimitFeatures=false&spatialRel=esriSpatialRelIntersects&where=1=1&geometryType=esriGeometryEnvelope';
+        }
+        Response response = await Dio().get(URL);
+
+        jsonData = response.data;
       }
-      Response response = await Dio().get(URL);
 
-      print("asdfghjk");
-      print(widget.options.attr);
-      print((widget.options.attr).isEmpty);
-      print(widget.options.attr == "");
-      print(widget.options.attr == null);
-      print("asdfghjk");
-
-      var features_ = <dynamic>[];
-
-      var jsonData = response.data;
       if (jsonData is String) {
         jsonData = jsonDecode(jsonData);
       }
-      // print(jsonData);
+
+      var features_ = <dynamic>[];
 
       if (jsonData["features"] != null) {
         if (widget.options.geometryType == "polyline") {
