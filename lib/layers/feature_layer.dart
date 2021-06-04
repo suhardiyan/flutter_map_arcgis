@@ -68,7 +68,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
     isMoving = true;
     timer = Timer(Duration(milliseconds: 200), () {
       isMoving = false;
-      _resetView();
+      // _resetView();
     });
   }
 
